@@ -15,7 +15,7 @@ struct ContentView: View {
     @State private var errorTitle = ""
     @State private var errorMsg = ""
     @State private var showError = false
-    
+    @State private var totalScore = 0
     var body: some View {
         NavigationStack{
             VStack {
@@ -35,6 +35,8 @@ struct ContentView: View {
                         }
                     }
                 }
+                Text("Score: \(totalScore)")
+                    .font(.largeTitle)
     //            List() {
     //                Section("Section 2"){
     //                    Text("Static Row 1")
@@ -63,6 +65,11 @@ struct ContentView: View {
             } message: {
                 Text(errorMsg)
             }
+            .toolbar{
+                Button("Restart Game") {
+                    restartGame()
+                }
+            }
         }
         
     }
@@ -86,9 +93,21 @@ struct ContentView: View {
             return
         }
         
+        guard shortWord(word: rawWord) else {
+            wordError(title: "Small Word", msg: "Come on, youre not a baby")
+            return
+        }
+        
+        guard sameRootWord(word: rawWord) else {
+            wordError(title: "Same Word", msg: "Dont enter the same given word")
+            return
+        }
+        
         withAnimation{
             usedWords.insert(rawWord, at: 0)
         }
+        
+        calculateScore(word: rawWord)
         newWord = ""
         
     }
@@ -134,6 +153,35 @@ struct ContentView: View {
         errorTitle = title
         errorMsg = msg
         showError = true
+    }
+    
+    func shortWord(word: String) -> Bool{
+        word.count >= 3
+    }
+    func sameRootWord(word: String) -> Bool{
+        word != rootWord
+    }
+    
+    func restartGame() {
+        usedWords = [String]()
+        rootWord = ""
+        newWord = ""
+        totalScore = 0
+        pickWord()
+    }
+    
+    func calculateScore(word: String){
+        if word.count <= 4 {
+            totalScore += word.count
+        } else {
+            totalScore += word.count + 1
+        }
+        
+        if usedWords.count == 5 {
+            totalScore += 1
+        } else if usedWords.count == 10 {
+            totalScore += 2
+        }
     }
 //    func testBundles() {
 //
